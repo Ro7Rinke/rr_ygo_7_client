@@ -1,0 +1,49 @@
+# Dependências
+node_modules
+.pnpm-store
+
+# Build
+dist
+dist-ssr
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Ambiente
+.env
+.env.*
+!.env.example
+
+# IDEs / Editores
+.vscode/
+.idea/
+.DS_Store
+*.swp
+
+# Sistema
+Thumbs.db
+
+# Vite
+.vite
+
+# TypeScript
+*.tsbuildinfo
+
+# Tauri
+src-tauri/target/
+src-tauri/Cargo.lock
+
+# Cache
+.cache
+.temp
+
+# Coverage (testes)
+coverage/
+
+# Misc
+*.local
