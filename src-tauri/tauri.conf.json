@@ -13,14 +13,14 @@
     "windows": [
       {
         "title": "rr_ygo_7_client",
-        "width": 800,
+        "width": 1200,
         "height": 600,
         "resizable": true,
         "fullscreen": false
       }
     ],
     "security": {
-      "csp": null
+      "csp": "default-src 'self'; img-src 'self' https://images.ygoprodeck.com data:;"
     }
   },
   "bundle": {
