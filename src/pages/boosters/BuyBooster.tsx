@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { buyBooster } from "../../services/booster";
 import { useParams } from "react-router-dom";
 import { getCardImageUrl, CardImageDefault } from "../../utils/common";
@@ -16,6 +16,8 @@ export default function BoosterShop() {
   const { id } = useParams();
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<any>(null);
+
+  const [images, setImages] = useState<Record<number, string>>({});
 
   async function handleBuy() {
     try {
@@ -35,9 +37,33 @@ export default function BoosterShop() {
     );
   }, [result]);
 
+  /* ================= LOAD IMAGES ================= */
+
+  useEffect(() => {
+    async function loadImages() {
+      if (!slots.length) return;
+
+      const newImages: Record<number, string> = {};
+
+      await Promise.all(
+        slots.map(async (item: any) => {
+          if (!item?.card_id) return;
+
+          const url = await getCardImageUrl(item.card_id, "small");
+          newImages[item.slot] = url;
+        })
+      );
+
+      setImages(newImages);
+    }
+
+    loadImages();
+  }, [slots]);
+
   return (
     <div style={containerStyle}>
       <BackButton />
+
       <h1 style={titleStyle}>
         {result?.booster || "Booster Shop"}
       </h1>
@@ -75,7 +101,7 @@ export default function BoosterShop() {
                 <img
                   src={
                     hasCard
-                      ? getCardImageUrl(item.card_id, "small")
+                      ? images[item.slot] || CardImageDefault
                       : CardImageDefault
                   }
                   style={cardImage}
@@ -101,6 +127,8 @@ export default function BoosterShop() {
     </div>
   );
 }
+
+/* ================= STYLES ================= */
 
 const containerStyle: React.CSSProperties = {
   padding: "30px 20px",
@@ -143,7 +171,6 @@ const buttonDisabled: React.CSSProperties = {
 
 const gridStyle: React.CSSProperties = {
   display: "grid",
-  // gridTemplateColumns: "repeat(auto-fit, minmax(120px, 1fr))",
   gridTemplateColumns: "repeat(auto-fit, 179px)",
   justifyContent: "center",
   gap: "16px",
@@ -157,8 +184,6 @@ const cardContainer: React.CSSProperties = {
 };
 
 const cardImage: React.CSSProperties = {
-  // width: "100%",
-  // maxWidth: "179px",
   width: "179px",
   height: "261px",
   objectFit: "fill",

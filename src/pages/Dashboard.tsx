@@ -4,32 +4,142 @@ import { syncCards } from "../services/cards";
 import type { User } from "../types/User";
 import { useNavigate } from "react-router-dom";
 
+// TAURI
+import { open } from "@tauri-apps/plugin-dialog";
+import { exists } from "@tauri-apps/plugin-fs";
+import { join } from "@tauri-apps/api/path";
+import { checkIsTauri } from "../utils/common";
+import { savePath, getPath } from "../utils/store";
+
+/* ================= CONFIG ================= */
+
+const REQUIRED_FOLDERS = [
+  "pics",
+  "deck",
+  "replay",
+  "lflists",
+  "expansions",
+  "repositories",
+  "config",
+];
+
+/* ================= COMPONENT ================= */
+
 export default function Dashboard() {
   const navigate = useNavigate();
 
   const [user, setUser] = useState<User | null>(null);
   const [loadingSync, setLoadingSync] = useState(false);
 
+  const [edoproPath, setEdoproPath] = useState<string | null>(null);
+  const [folderStatus, setFolderStatus] = useState<Record<string, boolean>>({});
+  const [isValidPath, setIsValidPath] = useState<boolean | null>(null);
+  const [isTauri, setIsTauri] = useState<boolean>(false);
+
+  /* ================= LOAD ================= */
+
   useEffect(() => {
     async function load() {
       const token = localStorage.getItem("token");
 
       if (!token) {
-        window.location.href = "/";
+        navigate("/");
         return;
       }
 
       try {
+        const tauriCheck = await checkIsTauri();
+        setIsTauri(tauriCheck);
+
         const data = await getMe(token);
+
+        if (!data) {
+          throw new Error("User inválido");
+        }
+
         setUser(data);
-      } catch {
+
+        if (tauriCheck) {
+          const saved = await getPath();
+
+          if (saved) {
+            const existsBase = await exists(saved);
+
+            // 🔥 Se a pasta não existe mais → limpa tudo
+            if (!existsBase) {
+              await savePath("");
+              setEdoproPath(null);
+              setIsValidPath(false);
+              return;
+            }
+
+            setEdoproPath(saved);
+            await validateFolder(saved);
+          }
+        }
+      } catch (e) {
+        console.error("AUTH ERROR:", e);
+
         localStorage.removeItem("token");
-        window.location.href = "/";
+        navigate("/");
       }
     }
 
     load();
   }, []);
+
+  /* ================= VALIDATION ================= */
+
+  const validateFolder = async (basePath: string) => {
+    try {
+      const results: Record<string, boolean> = {};
+
+      for (const folder of REQUIRED_FOLDERS) {
+        const fullPath = await join(basePath, folder);
+        results[folder] = await exists(fullPath);
+      }
+
+      setFolderStatus(results);
+
+      const allOk = Object.values(results).every(Boolean);
+      setIsValidPath(allOk);
+    } catch (e) {
+      console.error(e);
+      setIsValidPath(false);
+    }
+  };
+
+  /* ================= SELECT FOLDER ================= */
+
+  const handleSelectFolder = async () => {
+    try {
+      const selected = await open({
+        directory: true,
+        multiple: false,
+      });
+
+      if (!selected) return;
+
+      const path = Array.isArray(selected) ? selected[0] : selected;
+
+      const existsBase = await exists(path);
+
+      if (!existsBase) {
+        alert("Pasta inválida");
+        return;
+      }
+
+      await savePath(path);
+      setEdoproPath(path);
+
+      await validateFolder(path);
+    } catch (e) {
+      console.error(e);
+      alert("Erro ao selecionar pasta");
+    }
+  };
+
+  /* ================= SYNC ================= */
 
   const handleSync = async () => {
     const token = localStorage.getItem("token");
@@ -47,6 +157,8 @@ export default function Dashboard() {
     }
   };
 
+  /* ================= LOADING ================= */
+
   if (!user) {
     return (
       <div style={containerStyle}>
@@ -55,12 +167,54 @@ export default function Dashboard() {
     );
   }
 
+  /* ================= UI ================= */
+
   return (
     <div style={containerStyle}>
       <h1 style={titleStyle}>Bem-vindo, {user.nickname}</h1>
 
       <div style={cardStyle}>
         <p><strong>Email:</strong> {user.email}</p>
+
+        {/* ================= EDOPRO ================= */}
+        {isTauri && (
+          <>
+            <h2 style={sectionTitle}>EdoPro</h2>
+
+            <div style={{ marginBottom: "10px", wordBreak: "break-all" }}>
+              <strong>Caminho:</strong><br />
+              {edoproPath || "Não selecionado"}
+            </div>
+
+            <button style={buttonStyle} onClick={handleSelectFolder}>
+              {edoproPath ? "Alterar pasta" : "Selecionar pasta"}
+            </button>
+
+            {edoproPath && (
+              <div style={{ marginTop: "15px", textAlign: "left" }}>
+                <h3>Status das Pastas:</h3>
+
+                {REQUIRED_FOLDERS.map((folder) => (
+                  <div key={folder}>
+                    {folder}:{" "}
+                    <span style={{ color: folderStatus[folder] ? "#22c55e" : "#ef4444" }}>
+                      {folderStatus[folder] ? "OK" : "Faltando"}
+                    </span>
+                  </div>
+                ))}
+
+                <div style={{ marginTop: "10px", fontWeight: "bold" }}>
+                  Resultado:{" "}
+                  <span style={{ color: isValidPath ? "#22c55e" : "#ef4444" }}>
+                    {isValidPath ? "Pasta válida ✅" : "Pasta inválida ❌"}
+                  </span>
+                </div>
+              </div>
+            )}
+          </>
+        )}
+
+        {/* ================= STATS ================= */}
 
         <h2 style={sectionTitle}>Stats</h2>
 
@@ -72,6 +226,8 @@ export default function Dashboard() {
           <div style={statBox}>Draws<br />{user.draws}</div>
         </div>
 
+        {/* ================= ADMIN ================= */}
+
         {user.is_admin == 1 && (
           <div style={buttonGroup}>
             <button
@@ -81,18 +237,6 @@ export default function Dashboard() {
                 ...buttonStyle,
                 ...(loadingSync ? buttonDisabled : {}),
               }}
-              onMouseEnter={(e) =>
-                !loadingSync && (e.currentTarget.style.transform = "scale(1.05)")
-              }
-              onMouseLeave={(e) =>
-                !loadingSync && (e.currentTarget.style.transform = "scale(1)")
-              }
-              onMouseDown={(e) =>
-                !loadingSync && (e.currentTarget.style.transform = "scale(0.95)")
-              }
-              onMouseUp={(e) =>
-                !loadingSync && (e.currentTarget.style.transform = "scale(1.05)")
-              }
             >
               {loadingSync ? "Sincronizando..." : "Sincronizar Cards"}
             </button>
@@ -100,18 +244,6 @@ export default function Dashboard() {
             <button
               style={buttonStyle}
               onClick={() => navigate(`/booster/create-booster`)}
-              onMouseEnter={(e) =>
-                (e.currentTarget.style.transform = "scale(1.05)")
-              }
-              onMouseLeave={(e) =>
-                (e.currentTarget.style.transform = "scale(1)")
-              }
-              onMouseDown={(e) =>
-                (e.currentTarget.style.transform = "scale(0.95)")
-              }
-              onMouseUp={(e) =>
-                (e.currentTarget.style.transform = "scale(1.05)")
-              }
             >
               Create Booster
             </button>
@@ -120,23 +252,11 @@ export default function Dashboard() {
 
         <div style={buttonGroup}>
           <button
-          style={{ ...buttonStyle, marginTop: "20px" }}
-          onClick={() => navigate(`/booster/list-boosters`)}
-          onMouseEnter={(e) =>
-            (e.currentTarget.style.transform = "scale(1.05)")
-          }
-          onMouseLeave={(e) =>
-            (e.currentTarget.style.transform = "scale(1)")
-          }
-          onMouseDown={(e) =>
-            (e.currentTarget.style.transform = "scale(0.95)")
-          }
-          onMouseUp={(e) =>
-            (e.currentTarget.style.transform = "scale(1.05)")
-          }
-        >
-          List Boosters
-        </button>
+            style={{ ...buttonStyle, marginTop: "20px" }}
+            onClick={() => navigate(`/booster/list-boosters`)}
+          >
+            List Boosters
+          </button>
         </div>
       </div>
     </div>
@@ -157,8 +277,6 @@ const titleStyle: React.CSSProperties = {
   fontSize: "32px",
   fontWeight: "800",
   marginBottom: "20px",
-  letterSpacing: "1px",
-  textShadow: "0 4px 12px rgba(0,0,0,0.6)",
   background: "linear-gradient(90deg, #38bdf8, #6366f1)",
   WebkitBackgroundClip: "text",
   WebkitTextFillColor: "transparent",
@@ -170,8 +288,6 @@ const cardStyle: React.CSSProperties = {
   padding: "20px",
   borderRadius: "12px",
   background: "rgba(255,255,255,0.05)",
-  backdropFilter: "blur(6px)",
-  boxShadow: "0 6px 20px rgba(0,0,0,0.4)",
 };
 
 const sectionTitle: React.CSSProperties = {
@@ -209,12 +325,9 @@ const buttonStyle: React.CSSProperties = {
   cursor: "pointer",
   color: "#fff",
   background: "linear-gradient(135deg, #6366f1, #4f46e5)",
-  boxShadow: "0 6px 16px rgba(99,102,241,0.5)",
-  transition: "all 0.2s ease",
 };
 
 const buttonDisabled: React.CSSProperties = {
   opacity: 0.6,
   cursor: "not-allowed",
-  boxShadow: "none",
 };
