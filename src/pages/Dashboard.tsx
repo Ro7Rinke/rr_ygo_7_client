@@ -6,10 +6,12 @@ import { useNavigate } from "react-router-dom";
 
 // TAURI
 import { open } from "@tauri-apps/plugin-dialog";
-import { exists } from "@tauri-apps/plugin-fs";
+import { exists, readFile } from "@tauri-apps/plugin-fs";
 import { join } from "@tauri-apps/api/path";
 import { checkIsTauri } from "../utils/common";
 import { savePath, getPath } from "../utils/store";
+import { syncEdoPro } from "../utils/sync";
+import { uploadReplay } from "../services/game";
 
 /* ================= CONFIG ================= */
 
@@ -35,6 +37,7 @@ export default function Dashboard() {
   const [folderStatus, setFolderStatus] = useState<Record<string, boolean>>({});
   const [isValidPath, setIsValidPath] = useState<boolean | null>(null);
   const [isTauri, setIsTauri] = useState<boolean>(false);
+  const [loadingSyncEdoPro, setLoadingSyncEdoPro] = useState(false);
 
   /* ================= LOAD ================= */
 
@@ -157,6 +160,51 @@ export default function Dashboard() {
     }
   };
 
+  const handleSyncEdoPro = async () => {
+    setLoadingSyncEdoPro(true);
+
+    try {
+      await syncEdoPro();
+      alert("LFLists sincronizadas com sucesso!");
+    } catch (e: any) {
+      console.error(e);
+      alert(e.message || "Erro ao sincronizar LFLists");
+    } finally {
+      setLoadingSyncEdoPro(false);
+    }
+  };
+
+  const handleSendReplay = async () => {
+    setLoadingSyncEdoPro(true);
+
+    try {
+      const selected = await open({
+        multiple: false,
+        filters: [
+          {
+            name: "Replay",
+            extensions: ["yrp", "yrpX"],
+          },
+        ],
+      });
+      
+      if (!selected) {
+        setLoadingSyncEdoPro(false);
+        return;
+      }
+      const fileBytes = await readFile(selected);
+      const file = new File([fileBytes], "replay.yrpX");
+
+      await uploadReplay(file);
+      alert("Replay enviado com sucesso!");
+    } catch (e: any) {
+      console.error(e);
+      alert(e.message || "Erro ao enviar Replay");
+    } finally {
+      setLoadingSyncEdoPro(false);
+    }
+  };
+
   /* ================= LOADING ================= */
 
   if (!user) {
@@ -258,6 +306,32 @@ export default function Dashboard() {
             List Boosters
           </button>
         </div>
+
+        {isTauri && edoproPath && isValidPath && (
+          <div style={buttonGroup}>
+            <button
+              onClick={handleSyncEdoPro}
+              disabled={loadingSyncEdoPro}
+              style={{
+                ...buttonStyle,
+                ...(loadingSync ? buttonDisabled : {}),
+              }}
+            >
+              {loadingSyncEdoPro ? "Sincronizando EdoPro..." : "Sincronizar EdoPro"}
+            </button>
+            <button
+              onClick={handleSendReplay}
+              disabled={loadingSyncEdoPro}
+              style={{
+                ...buttonStyle,
+                ...(loadingSync ? buttonDisabled : {}),
+              }}
+            >
+              {loadingSyncEdoPro ? "Enviando Replay..." : "Enviar Replay"}
+            </button>
+          </div>
+        )}
+
       </div>
     </div>
   );

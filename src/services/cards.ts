@@ -21,3 +21,8 @@ export async function getCards(inGame?: number) {
   const res = await api.get(`/cards${params}`);
   return res.data;
 }
+
+export async function getUserCards() {
+  const res = await api.get("/cards/user");
+  return res.data;
+}
