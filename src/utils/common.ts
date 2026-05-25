@@ -62,3 +62,13 @@ export const checkIsTauri = async () => {
     return false;
   }
 };
+
+export const hashSHA256 = async (data: ArrayBuffer | Uint8Array<ArrayBufferLike>): Promise<string> => {
+  const cleanBuffer = new Uint8Array(data instanceof Uint8Array ? data : new Uint8Array(data));
+
+  const hashBuffer = await crypto.subtle.digest("SHA-256", cleanBuffer);
+
+  return Array.from(new Uint8Array(hashBuffer))
+    .map(b => b.toString(16).padStart(2, "0"))
+    .join("");
+};

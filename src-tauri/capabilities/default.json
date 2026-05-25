@@ -59,6 +59,16 @@
         }
       ]
     },
+    {
+      "identifier": "fs:allow-read-dir",
+      "allow": [
+        {
+          "path": "**"
+        }
+      ]
+    },
+    "fs:read-dirs",
+    "fs:read-all",
     "store:default",
     "store:allow-load",
     "store:allow-save"

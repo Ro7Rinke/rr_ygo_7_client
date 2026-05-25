@@ -2,6 +2,7 @@ import { getCards, getUserCards } from "../services/cards";
 import { getPath } from "./store";
 import { writeTextFile, mkdir, exists } from "@tauri-apps/plugin-fs";
 import { join } from "@tauri-apps/api/path";
+import { syncReplays } from "./replay";
 
 export async function syncEdoPro() {
   const basePath = await getPath();
@@ -60,6 +61,10 @@ export async function syncEdoPro() {
   await writeTextFile(myCardsPath, myList.join("\n"));
   await writeTextFile(rr7Path, rr7List.join("\n"));
 
+  const result = await syncReplays(basePath);
+
+  console.log(result)
+  
   return {
     success: true,
     path: lflistsPath,
