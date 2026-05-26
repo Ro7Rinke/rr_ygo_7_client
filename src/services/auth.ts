@@ -12,11 +12,7 @@ export async function signup(email: string, password: string, nickname: string) 
   return res.data;
 }
 
-export async function getMe(token: string) {
-  const res = await api.get("/player/me", {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
+export async function getMe() {
+  const res = await api.get("/player/me");
   return res.data;
 }

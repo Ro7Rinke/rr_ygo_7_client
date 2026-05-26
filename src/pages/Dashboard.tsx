@@ -9,7 +9,7 @@ import { open } from "@tauri-apps/plugin-dialog";
 import { exists, readFile } from "@tauri-apps/plugin-fs";
 import { join } from "@tauri-apps/api/path";
 import { checkIsTauri } from "../utils/common";
-import { savePath, getPath } from "../utils/store";
+import { savePath, getPath, getAuthToken } from "../utils/store";
 import { syncEdoPro } from "../utils/sync";
 import { uploadReplay } from "../services/game";
 
@@ -43,7 +43,7 @@ export default function Dashboard() {
 
   useEffect(() => {
     async function load() {
-      const token = localStorage.getItem("token");
+      const token = getAuthToken();
 
       if (!token) {
         navigate("/");
@@ -54,7 +54,7 @@ export default function Dashboard() {
         const tauriCheck = await checkIsTauri();
         setIsTauri(tauriCheck);
 
-        const data = await getMe(token);
+        const data = await getMe();
 
         if (!data) {
           throw new Error("User inválido");
@@ -68,7 +68,7 @@ export default function Dashboard() {
           if (saved) {
             const existsBase = await exists(saved);
 
-            // 🔥 Se a pasta não existe mais → limpa tudo
+            //Se a pasta não existe mais → limpa tudo
             if (!existsBase) {
               await savePath("");
               setEdoproPath(null);
@@ -78,6 +78,8 @@ export default function Dashboard() {
 
             setEdoproPath(saved);
             await validateFolder(saved);
+
+            await handleSyncEdoPro(true)
           }
         }
       } catch (e) {
@@ -160,15 +162,15 @@ export default function Dashboard() {
     }
   };
 
-  const handleSyncEdoPro = async () => {
+  const handleSyncEdoPro = async (isSilent: boolean = false) => {
     setLoadingSyncEdoPro(true);
 
     try {
       await syncEdoPro();
-      alert("LFLists sincronizadas com sucesso!");
+      if (!isSilent) alert("Sincronizado com sucesso.\nReinicie o EDOPro!");
     } catch (e: any) {
       console.error(e);
-      alert(e.message || "Erro ao sincronizar LFLists");
+      if (!isSilent) alert(e.message || "Erro ao sincronizar EDOPro");
     } finally {
       setLoadingSyncEdoPro(false);
     }
@@ -187,7 +189,7 @@ export default function Dashboard() {
           },
         ],
       });
-      
+
       if (!selected) {
         setLoadingSyncEdoPro(false);
         return;
@@ -227,10 +229,14 @@ export default function Dashboard() {
         {/* ================= EDOPRO ================= */}
         {isTauri && (
           <>
-            <h2 style={sectionTitle}>EdoPro</h2>
+            {/* <h2 style={sectionTitle}>EdoPro</h2> */}
 
             <div style={{ marginBottom: "10px", wordBreak: "break-all" }}>
-              <strong>Caminho:</strong><br />
+              <strong>EDOPro:
+                <span style={{ color: isValidPath ? "#22c55e" : "#ef4444" }}>
+                  {isValidPath ? " Pasta válida ✅" : " Pasta inválida ❌"}
+                </span>
+              </strong><br />
               {edoproPath || "Não selecionado"}
             </div>
 
@@ -238,7 +244,7 @@ export default function Dashboard() {
               {edoproPath ? "Alterar pasta" : "Selecionar pasta"}
             </button>
 
-            {edoproPath && (
+            {/* {edoproPath && (
               <div style={{ marginTop: "15px", textAlign: "left" }}>
                 <h3>Status das Pastas:</h3>
 
@@ -258,7 +264,7 @@ export default function Dashboard() {
                   </span>
                 </div>
               </div>
-            )}
+            )} */}
           </>
         )}
 
@@ -310,7 +316,7 @@ export default function Dashboard() {
         {isTauri && edoproPath && isValidPath && (
           <div style={buttonGroup}>
             <button
-              onClick={handleSyncEdoPro}
+              onClick={() => handleSyncEdoPro(false)}
               disabled={loadingSyncEdoPro}
               style={{
                 ...buttonStyle,

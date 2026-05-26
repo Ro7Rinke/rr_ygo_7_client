@@ -1,20 +1,64 @@
-import { useState } from "react";
-import { login } from "../services/auth";
+import { useEffect, useState } from "react";
+import { getMe, login } from "../services/auth";
 import { useNavigate } from "react-router-dom";
+import { getAuthToken, getLastEmail, removeAuthToken, setAuthToken, setLasEmail } from "../utils/store";
 
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
 
   async function handleLogin() {
     try {
       const data = await login(email, password);
-      localStorage.setItem("token", data.access_token);
+      setAuthToken(data.access_token);
+
+      setLasEmail(email)
+
       navigate("/dashboard");
     } catch {
       alert("Erro no login");
     }
+  }
+
+  useEffect(() => {
+    async function load (){
+      try{
+        const last_email = getLastEmail();
+        if(last_email) setEmail(last_email);
+
+        const token = getAuthToken();
+        if(token){
+          try{
+            const user = await getMe();
+            if(user){
+              navigate("/dashboard")
+            }else{
+              removeAuthToken()
+            }
+          }catch (e){
+            removeAuthToken()
+          }
+        }
+      }catch (e){
+
+      }finally{
+        setIsLoading(false);
+      }
+    };
+
+    load();
+  }, []);
+
+  if (isLoading) {
+    return (
+      <div style={container}>
+        <div style={card}>
+          <p style={title}>Carregando...</p>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -25,6 +69,7 @@ export default function Login() {
         <input
           style={input}
           placeholder="Email"
+          value={email}
           onChange={(e) => setEmail(e.target.value)}
         />
 

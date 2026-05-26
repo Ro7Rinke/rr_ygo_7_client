@@ -1,8 +1,44 @@
 import { getCards, getUserCards } from "../services/cards";
 import { getPath } from "./store";
-import { writeTextFile, mkdir, exists } from "@tauri-apps/plugin-fs";
+import { readTextFile, writeTextFile, mkdir, exists } from "@tauri-apps/plugin-fs";
 import { join } from "@tauri-apps/api/path";
 import { syncReplays } from "./replay";
+import { getMe } from "../services/auth";
+
+/**
+ * Atualiza o nickname do usuário dentro do arquivo config/system.conf do EDOPro.
+ * @param basePath Caminho base onde a pasta 'config' está localizada.
+ * @param newNickname O novo nick que será injetado no arquivo.
+ */
+export async function updateEdoproNickname(basePath: string, newNickname: string): Promise<boolean> {
+  try {
+    const configPath = await join(basePath, "config", "system.conf");
+
+    if (!(await exists(configPath))) {
+      console.log("Arquivo system.conf não foi encontrado no caminho especificado.");
+      return false;
+    }
+
+    const content = await readTextFile(configPath);
+
+    const nicknameRegex = /^(nickname\s*=\s*)(.*)$/m;
+
+    let updatedContent = "";
+
+    if (nicknameRegex.test(content)) {
+      updatedContent = content.replace(nicknameRegex, `$1${newNickname}`);
+    } else {
+      updatedContent = content.trim() + `\nnickname = ${newNickname}\n`;
+    }
+
+    await writeTextFile(configPath, updatedContent);
+
+    return true;
+  } catch (err) {
+    console.log("Erro ao atualizar o nickname no EDOPro:", err);
+    return false;
+  }
+}
 
 export async function syncEdoPro() {
   const basePath = await getPath();
@@ -17,10 +53,13 @@ export async function syncEdoPro() {
     await mkdir(lflistsPath, { recursive: true });
   }
 
-  const [allCards, userCards] = await Promise.all([
+  const [user, allCards, userCards] = await Promise.all([
+    getMe(),
     getCards(1),
     getUserCards(),
   ]);
+
+  await updateEdoproNickname(basePath, user.nickname)
 
   // =========================
   // 🟢 MY CARDS (whitelist)
@@ -61,10 +100,8 @@ export async function syncEdoPro() {
   await writeTextFile(myCardsPath, myList.join("\n"));
   await writeTextFile(rr7Path, rr7List.join("\n"));
 
-  const result = await syncReplays(basePath);
+  await syncReplays(basePath);
 
-  console.log(result)
-  
   return {
     success: true,
     path: lflistsPath,
