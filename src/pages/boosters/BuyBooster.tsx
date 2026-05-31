@@ -3,21 +3,35 @@ import { buyBooster } from "../../services/booster";
 import { useParams } from "react-router-dom";
 import { getCardImageUrl, CardImageDefault } from "../../utils/common";
 import BackButton from "../../components/BackButton";
-
-const rarityMap: Record<number, string> = {
-  10: "N",
-  20: "R",
-  30: "SR",
-  40: "UR",
-  50: "SC",
-};
+import { getRarities } from "../../services/rarity";
 
 export default function BoosterShop() {
   const { id } = useParams();
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<any>(null);
-
   const [images, setImages] = useState<Record<number, string>>({});
+
+  const [rarities, setRarities] = useState<Record<number, string>>({});
+
+  /* ================= LOAD RARITIES ================= */
+  useEffect(() => {
+    async function fetchRarities() {
+      try {
+        const data = await getRarities();
+
+        const map: Record<number, string> = {};
+        data.forEach((r) => {
+          map[r.id] = r.code;
+        });
+
+        setRarities(map);
+      } catch (error) {
+        console.error("Error fetching rarities:", error);
+      }
+    }
+
+    fetchRarities();
+  }, []);
 
   async function handleBuy() {
     try {
@@ -32,13 +46,10 @@ export default function BoosterShop() {
   const slots = useMemo(() => {
     if (!result?.results) return [];
 
-    return [...result.results].sort(
-      (a: any, b: any) => a.slot - b.slot
-    );
+    return [...result.results].sort((a: any, b: any) => a.slot - b.slot);
   }, [result]);
 
   /* ================= LOAD IMAGES ================= */
-
   useEffect(() => {
     async function loadImages() {
       if (!slots.length) return;
@@ -64,9 +75,7 @@ export default function BoosterShop() {
     <div style={containerStyle}>
       <BackButton />
 
-      <h1 style={titleStyle}>
-        {result?.booster || "Booster Shop"}
-      </h1>
+      <h1 style={titleStyle}>{result?.booster || "Booster Shop"}</h1>
 
       <button
         onClick={handleBuy}
@@ -75,18 +84,10 @@ export default function BoosterShop() {
           ...buttonStyle,
           ...(loading ? buttonDisabled : {}),
         }}
-        onMouseEnter={(e) =>
-          !loading && (e.currentTarget.style.transform = "scale(1.05)")
-        }
-        onMouseLeave={(e) =>
-          !loading && (e.currentTarget.style.transform = "scale(1)")
-        }
-        onMouseDown={(e) =>
-          !loading && (e.currentTarget.style.transform = "scale(0.95)")
-        }
-        onMouseUp={(e) =>
-          !loading && (e.currentTarget.style.transform = "scale(1.05)")
-        }
+        onMouseEnter={(e) => !loading && (e.currentTarget.style.transform = "scale(1.05)")}
+        onMouseLeave={(e) => !loading && (e.currentTarget.style.transform = "scale(1)")}
+        onMouseDown={(e) => !loading && (e.currentTarget.style.transform = "scale(0.95)")}
+        onMouseUp={(e) => !loading && (e.currentTarget.style.transform = "scale(1.05)")}
       >
         {loading ? "Opening..." : "Buy Booster"}
       </button>
@@ -95,28 +96,43 @@ export default function BoosterShop() {
         <div style={gridStyle}>
           {slots.map((item: any) => {
             const hasCard = item?.card_id;
+            const isDiscarded = item?.discardedByLimit;
 
             return (
               <div key={item.slot} style={cardContainer}>
-                <img
-                  src={
-                    hasCard
-                      ? images[item.slot] || CardImageDefault
-                      : CardImageDefault
-                  }
-                  style={cardImage}
-                />
+                <div style={{ position: "relative" }}>
+                  <img
+                    src={
+                      hasCard
+                        ? images[item.slot] || CardImageDefault
+                        : CardImageDefault
+                    }
+                    style={{
+                      ...cardImage,
+                      ...(isDiscarded ? discardedCardStyle : {}), // Aplica opacidade se foi descartada
+                    }}
+                    alt="Card"
+                  />
+
+                  {/* Badge visual caso a carta tenha sido descartada pelo limite de 9 cópias */}
+                  {isDiscarded && (
+                    <div style={refundBadgeStyle}>
+                      <span>MAX 9</span>
+                      <small style={{ fontSize: "11px" }}>💰 +{item.refunded}</small>
+                    </div>
+                  )}
+                </div>
 
                 <div style={infoStyle}>
                   {hasCard ? (
-                    <span>
-                      {rarityMap[item.rarity_id] ||
-                        item.rarity_id}
+                    <span style={isDiscarded ? { color: "#ef4444", textDecoration: "line-through" } : {}}>
+                      {/* Usa primeiro o fallback do backend (rarity_code), depois o mapa dinâmico e por fim o id */}
+                      {item.rarity_code || rarities[item.rarity_id] || item.rarity_id}
                     </span>
                   ) : item?.refunded ? (
-                    <span>💰 +{item.refunded}</span>
+                    <span style={{ color: "#eab308" }}>💰 +{item.refunded}</span>
                   ) : (
-                    <span>EMPTY</span>
+                    <span style={{ color: "#64748b" }}>EMPTY</span>
                   )}
                 </div>
               </div>
@@ -189,6 +205,31 @@ const cardImage: React.CSSProperties = {
   objectFit: "fill",
   borderRadius: "8px",
   boxShadow: "0 6px 16px rgba(0,0,0,0.5)",
+  transition: "all 0.2s ease",
+};
+
+const discardedCardStyle: React.CSSProperties = {
+  opacity: 0.4,
+  filter: "grayscale(80%)",
+};
+
+const refundBadgeStyle: React.CSSProperties = {
+  position: "absolute",
+  top: "50%",
+  left: "50%",
+  transform: "translate(-50%, -50%)",
+  background: "rgba(239, 68, 68, 0.95)",
+  color: "white",
+  padding: "8px 12px",
+  borderRadius: "6px",
+  fontWeight: "800",
+  fontSize: "14px",
+  display: "flex",
+  flexDirection: "column",
+  alignItems: "center",
+  boxShadow: "0 4px 10px rgba(0,0,0,0.5)",
+  border: "1px solid #f87171",
+  pointerEvents: "none",
 };
 
 const infoStyle: React.CSSProperties = {
