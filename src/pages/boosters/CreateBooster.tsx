@@ -39,7 +39,7 @@ export default function CreateBooster() {
         const token = localStorage.getItem("token");
         if (!token) return;
 
-        getMe(token).then(setUser);
+        getMe().then(setUser);
     }, []);
 
     useEffect(() => {

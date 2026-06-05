@@ -6,6 +6,8 @@ export interface User {
 
   rp: number;
   cash: number;
+  tickets: number;
+  gold_tickets: number;
   wins: number;
   loses: number;
   draws: number;

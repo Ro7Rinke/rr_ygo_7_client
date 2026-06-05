@@ -12,6 +12,7 @@ export type BoosterSlot = {
 };
 
 export type Booster = {
+  money_type: string;
   id: number;
   title: string;
   code: string;

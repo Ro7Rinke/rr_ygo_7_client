@@ -9,9 +9,10 @@ import { open } from "@tauri-apps/plugin-dialog";
 import { exists, readFile } from "@tauri-apps/plugin-fs";
 import { join } from "@tauri-apps/api/path";
 import { checkIsTauri } from "../utils/common";
-import { savePath, getPath, getAuthToken } from "../utils/store";
+import { savePath, getPath, getAuthToken, removeAuthToken } from "../utils/store";
 import { syncEdoPro } from "../utils/sync";
 import { uploadReplay } from "../services/game";
+import { handleImportBoosterJson } from "../utils/booster";
 
 /* ================= CONFIG ================= */
 
@@ -147,7 +148,7 @@ export default function Dashboard() {
   /* ================= SYNC ================= */
 
   const handleSync = async () => {
-    const token = localStorage.getItem("token");
+    const token = getAuthToken();
     if (!token) return;
 
     setLoadingSync(true);
@@ -206,6 +207,12 @@ export default function Dashboard() {
       setLoadingSyncEdoPro(false);
     }
   };
+
+  const handleLogOut = () => {
+    removeAuthToken()
+    navigate('/')
+    return
+  }
 
   /* ================= LOADING ================= */
 
@@ -278,6 +285,8 @@ export default function Dashboard() {
           <div style={statBox}>Wins<br />{user.wins}</div>
           <div style={statBox}>Loses<br />{user.loses}</div>
           <div style={statBox}>Draws<br />{user.draws}</div>
+          <div style={statBox}>Tickets<br />{user.tickets}</div>
+          <div style={statBox}>Gold Tickets<br />{user.gold_tickets}</div>
         </div>
 
         {/* ================= ADMIN ================= */}
@@ -301,17 +310,24 @@ export default function Dashboard() {
             >
               Create Booster
             </button>
+            <button
+              onClick={handleImportBoosterJson}
+              disabled={loadingSync}
+              style={{
+                ...buttonStyle,
+                ...(loadingSync ? buttonDisabled : {}),
+              }}
+            >
+              {loadingSync ? "Importando..." : "Importar Booster"}
+            </button>
+            <button
+              style={buttonStyle}
+              onClick={() => navigate(`/booster/admin-activation`)}
+            >
+              Ativar Booster
+            </button>
           </div>
         )}
-
-        <div style={buttonGroup}>
-          <button
-            style={{ ...buttonStyle, marginTop: "20px" }}
-            onClick={() => navigate(`/booster/list-boosters`)}
-          >
-            List Boosters
-          </button>
-        </div>
 
         {isTauri && edoproPath && isValidPath && (
           <div style={buttonGroup}>
@@ -337,6 +353,21 @@ export default function Dashboard() {
             </button>
           </div>
         )}
+
+        <div style={buttonGroup}>
+          <button
+            style={{ ...buttonStyle, marginTop: "20px" }}
+            onClick={() => navigate(`/booster/list-boosters`)}
+          >
+            List Boosters
+          </button>
+          <button
+            style={buttonStyle}
+            onClick={handleLogOut}
+          >
+            Sair
+          </button>
+        </div>
 
       </div>
     </div>

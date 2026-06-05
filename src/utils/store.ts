@@ -37,5 +37,5 @@ export const getAuthToken = () => {
 }
 
 export const removeAuthToken = () => {
-  localStorage.removeItem("token");
+  localStorage.removeItem("auth_token");
 }

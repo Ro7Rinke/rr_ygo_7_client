@@ -1,75 +1,60 @@
-import { useState, useMemo, useEffect } from "react";
-import { buyBooster } from "../../services/booster";
+import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { getCardImageUrl, CardImageDefault } from "../../utils/common";
 import BackButton from "../../components/BackButton";
-import { getRarities } from "../../services/rarity";
+import { buySealedDeck } from "../../services/booster";
 
-export default function BuyBooster() {
+interface CardItem {
+  card_id: number;
+  amount: number;
+  name?: string;
+  rarity_code: string;
+}
+
+export default function SealedDeckShop() {
   const { id } = useParams();
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<any>(null);
   const [images, setImages] = useState<Record<number, string>>({});
-  const [rarities, setRarities] = useState<Record<number, string>>({});
-  
   const [revealActive, setRevealActive] = useState(false);
-
-  /* ================= LOAD RARITIES ================= */
-  useEffect(() => {
-    async function fetchRarities() {
-      try {
-        const data = await getRarities();
-        const map: Record<number, string> = {};
-        data.forEach((r) => {
-          map[r.id] = r.code;
-        });
-        setRarities(map);
-      } catch (error) {
-        console.error("Error fetching rarities:", error);
-      }
-    }
-    fetchRarities();
-  }, []);
 
   async function handleBuy() {
     try {
       setLoading(true);
-      setRevealActive(false); // Reseta a animação anterior
-      const data = await buyBooster(Number(id));
+      setRevealActive(false);
+      
+      const data = await buySealedDeck(Number(id));
       setResult(data);
       
+      // Ativa a animação em cascata logo após a renderização dos cards
       setTimeout(() => setRevealActive(true), 50);
     } catch (err) {
-      console.error("Failed to buy booster", err);
+      console.error("Failed to buy sealed deck", err);
+      alert("Erro ao adquirir o Sealed Deck.");
     } finally {
       setLoading(false);
     }
   }
 
-  const slots = useMemo(() => {
-    if (!result?.results) return [];
-    return [...result.results].sort((a: any, b: any) => a.slot - b.slot);
-  }, [result]);
-
-  /* ================= LOAD IMAGES ================= */
+  /* ================= CARREGAMENTO DE IMAGENS DO DECK ================= */
   useEffect(() => {
     async function loadImages() {
-      if (!slots.length) return;
+      if (!result?.cards?.length) return;
 
       const newImages: Record<number, string> = {};
 
       await Promise.all(
-        slots.map(async (item: any) => {
-          if (!item?.card_id) return;
+        result.cards.map(async (item: CardItem) => {
+          if (!item.card_id) return;
           const url = await getCardImageUrl(item.card_id, "small");
-          newImages[item.slot] = url;
+          newImages[item.card_id] = url;
         })
       );
 
       setImages(newImages);
     }
     loadImages();
-  }, [slots]);
+  }, [result]);
 
   return (
     <div style={containerStyle}>
@@ -82,12 +67,14 @@ export default function BuyBooster() {
 
       <div style={headerContainer}>
         <BackButton />
-        <h1 style={titleStyle}>{result?.booster || "Booster Shop"}</h1>
-        <div style={{ width: "40px" }} /> {/* Espaçador para equilibrar o BackButton no flexbox */}
+        <h1 style={titleStyle}>{result?.title || "Sealed Deck Shop"}</h1>
+        <div style={{ width: "40px" }} />
       </div>
 
       <div style={shopControlCard}>
-        <p style={shopDescription}>Adquira este booster para expandir sua coleção com cartas aleatórias de raridades variadas.</p>
+        <p style={shopDescription}>
+          Adquira este deck selado estruturado. Ao comprar, todas as cartas listadas abaixo serão adicionadas diretamente à sua coleção.
+        </p>
         <button
           onClick={handleBuy}
           disabled={loading}
@@ -95,65 +82,43 @@ export default function BuyBooster() {
             ...buttonStyle,
             ...(loading ? buttonDisabled : {}),
           }}
-          onMouseEnter={(e) => !loading && (e.currentTarget.style.background = "linear-gradient(135deg, #4f46e5, #4338ca)")}
-          onMouseLeave={(e) => !loading && (e.currentTarget.style.background = "linear-gradient(135deg, #6366f1, #4f46e5)")}
+          onMouseEnter={(e) => !loading && (e.currentTarget.style.background = "linear-gradient(135deg, #059669, #047857)")}
+          onMouseLeave={(e) => !loading && (e.currentTarget.style.background = "linear-gradient(135deg, #10b981, #059669)")}
         >
-          {loading ? "Opening Booster Pack..." : "Buy & Open Booster"}
+          {loading ? "Adquirindo Deck..." : "Comprar Sealed Deck"}
         </button>
       </div>
 
-      {result && (
+      {result?.cards && (
         <div style={showcaseArea}>
-          <h2 style={revealTitle}>Cartas Obtidas</h2>
+          <h2 style={revealTitle}>Conteúdo do Deck Adquirido</h2>
           <div style={gridStyle}>
-            {slots.map((item: any, index: number) => {
-              const hasCard = item?.card_id;
-              const isDiscarded = item?.discardedByLimit;
-
+            {result.cards.map((item: CardItem, index: number) => {
               const animatedCardContainer: React.CSSProperties = {
                 ...cardContainer,
                 opacity: revealActive ? 1 : 0,
                 animation: revealActive ? `fadeInCard 0.3s ease forwards` : "none",
-                animationDelay: revealActive ? `${index * 80}ms` : "0ms",
+                animationDelay: revealActive ? `${index * 50}ms` : "0ms",
               };
 
               return (
-                <div key={item.slot} style={animatedCardContainer}>
+                <div key={item.card_id} style={animatedCardContainer}>
                   <div style={imageWrapper}>
                     <img
-                      src={
-                        hasCard
-                          ? images[item.slot] || CardImageDefault
-                          : CardImageDefault
-                      }
-                      style={{
-                        ...cardImage,
-                        ...(isDiscarded ? discardedCardStyle : {}),
-                      }}
+                      src={images[item.card_id] || CardImageDefault}
+                      style={cardImage}
                       alt="Card Artwork"
                     />
-
-                    {isDiscarded && (
-                      <div style={refundBadgeStyle}>
-                        <span style={maxBadgeText}>LIMITE 9 ❌</span>
-                        <span style={refundAmountText}>💰 +{item.refunded}</span>
-                      </div>
-                    )}
+                    
+                    <div style={quantityBadgeStyle}>
+                      x{item.amount}
+                    </div>
                   </div>
 
                   <div style={infoStyle}>
-                    {hasCard ? (
-                      <span style={{
-                        ...rarityBadgeStyle,
-                        ...(isDiscarded ? discardedRarityStyle : {})
-                      }}>
-                        {item.rarity_code || rarities[item.rarity_id] || item.rarity_id}
-                      </span>
-                    ) : item?.refunded ? (
-                      <span style={emptySlotRefund}>💰 +{item.refunded}</span>
-                    ) : (
-                      <span style={emptySlotText}>EMPTY</span>
-                    )}
+                    <span style={rarityBadgeStyle}>
+                      {item.rarity_code || 'UK'}
+                    </span>
                   </div>
                 </div>
               );
@@ -187,7 +152,7 @@ const titleStyle: React.CSSProperties = {
   fontSize: "28px",
   fontWeight: "800",
   margin: 0,
-  background: "linear-gradient(90deg, #38bdf8, #6366f1)",
+  background: "linear-gradient(90deg, #10b981, #3b82f6)",
   WebkitBackgroundClip: "text",
   WebkitTextFillColor: "transparent",
 };
@@ -218,7 +183,7 @@ const buttonStyle: React.CSSProperties = {
   border: "none",
   cursor: "pointer",
   color: "#fff",
-  background: "linear-gradient(135deg, #6366f1, #4f46e5)",
+  background: "linear-gradient(135deg, #10b981, #059669)",
   transition: "all 0.2s ease-in-out",
 };
 
@@ -240,7 +205,7 @@ const revealTitle: React.CSSProperties = {
   fontWeight: "700",
   textAlign: "left",
   marginBottom: "20px",
-  color: "#38bdf8",
+  color: "#10b981",
   textTransform: "uppercase",
   letterSpacing: "0.5px",
 };
@@ -270,43 +235,20 @@ const cardImage: React.CSSProperties = {
   width: "170px",
   height: "248px",
   objectFit: "fill",
-  transition: "transform 0.2s ease",
 };
 
-const discardedCardStyle: React.CSSProperties = {
-  opacity: 0.25,
-  filter: "grayscale(100%) blur(1px)",
-};
-
-const refundBadgeStyle: React.CSSProperties = {
+const quantityBadgeStyle: React.CSSProperties = {
   position: "absolute",
-  top: 0,
-  left: 0,
-  right: 0,
-  bottom: 0,
-  background: "rgba(15, 23, 42, 0.75)",
-  display: "flex",
-  flexDirection: "column",
-  justifyContent: "center",
-  alignItems: "center",
-  gap: "6px",
-  pointerEvents: "none",
-};
-
-const maxBadgeText: React.CSSProperties = {
-  background: "#ef4444",
-  color: "#fff",
-  padding: "3px 8px",
-  borderRadius: "4px",
+  top: "8px",
+  right: "8px",
+  background: "rgba(15, 23, 42, 0.9)",
+  color: "#10b981",
+  padding: "4px 8px",
+  borderRadius: "6px",
   fontWeight: "800",
-  fontSize: "11px",
-  letterSpacing: "0.5px",
-};
-
-const refundAmountText: React.CSSProperties = {
   fontSize: "13px",
-  fontWeight: "700",
-  color: "#eab308",
+  border: "1px solid rgba(16, 185, 129, 0.4)",
+  boxShadow: "0 2px 6px rgba(0,0,0,0.4)",
 };
 
 const infoStyle: React.CSSProperties = {
@@ -323,25 +265,5 @@ const rarityBadgeStyle: React.CSSProperties = {
   border: "1px solid rgba(255,255,255,0.08)",
   fontSize: "12px",
   fontWeight: "700",
-  color: "#f8fafc",
-};
-
-const discardedRarityStyle: React.CSSProperties = {
-  background: "transparent",
-  borderColor: "rgba(239, 68, 68, 0.2)",
-  color: "#ef4444",
-  textDecoration: "line-through",
-  opacity: 0.6,
-};
-
-const emptySlotRefund: React.CSSProperties = {
-  fontSize: "12px",
-  fontWeight: "700",
-  color: "#eab308",
-};
-
-const emptySlotText: React.CSSProperties = {
-  fontSize: "12px",
-  fontWeight: "600",
-  color: "#475569",
+  color: "#cbd5e1",
 };
