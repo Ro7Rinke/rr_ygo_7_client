@@ -2,7 +2,7 @@
   "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
   "productName": "rr_ygo_7_client",
   "version": "0.1.0",
-  "identifier": "com.tauri.dev",
+  "identifier": "com.rrygo7.client",
   "build": {
     "frontendDist": "../dist",
     "devUrl": "http://localhost:5173",
@@ -12,9 +12,9 @@
   "app": {
     "windows": [
       {
-        "title": "rr_ygo_7_client",
-        "width": 1200,
-        "height": 600,
+        "title": "RRYGO7",
+        "width": 800,
+        "height": 800,
         "resizable": true,
         "fullscreen": false
       }
