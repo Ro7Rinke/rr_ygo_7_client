@@ -20,7 +20,7 @@
       }
     ],
     "security": {
-      "csp": "default-src 'self' asset: http://asset.localhost data: https://images.ygoprodeck.com; img-src * data: asset: http://asset.localhost;",
+      "csp": "default-src 'self' asset: http://asset.localhost data: https://images.ygoprodeck.com; img-src * data: asset: http://asset.localhost; connect-src * 'unsafe-inline' http://* https://* ws://* wss://*;",
       "assetProtocol": {
         "enable": true,
         "scope": [
