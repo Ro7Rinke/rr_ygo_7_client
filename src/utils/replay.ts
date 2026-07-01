@@ -59,7 +59,7 @@ export async function syncReplays(basePath: string) {
 
         const hash = await hashSHA256(buffer);
 
-        if (localHashes.has(hash)) continue;
+        // if (localHashes.has(hash)) continue;
 
         candidates.push({
             name: f.name!,

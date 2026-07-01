@@ -17,3 +17,11 @@ export async function checkReplayHashes(hashes: string[]) {
     missing: string[];
   };
 }
+
+export async function finalizeDuel(duelId: string){
+  const res = await api.post("/game/finalize-duel", {
+    duelId
+  })
+  console.log(res)
+  return res.data;
+}

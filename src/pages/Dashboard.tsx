@@ -3,6 +3,7 @@ import { getMe } from "../services/auth";
 import { syncCards } from "../services/cards";
 import type { User } from "../types/User";
 import { useNavigate } from "react-router-dom";
+import Swal from 'sweetalert2';
 
 // TAURI
 import { open } from "@tauri-apps/plugin-dialog";
@@ -11,7 +12,7 @@ import { join } from "@tauri-apps/api/path";
 import { checkIsTauri } from "../utils/common";
 import { savePath, getPath, getAuthToken, removeAuthToken } from "../utils/store";
 import { syncEdoPro } from "../utils/sync";
-import { uploadReplay } from "../services/game";
+import { finalizeDuel, uploadReplay } from "../services/game";
 import { handleImportBoosterJson } from "../utils/booster";
 
 /* ================= CONFIG ================= */
@@ -39,6 +40,7 @@ export default function Dashboard() {
   const [isValidPath, setIsValidPath] = useState<boolean | null>(null);
   const [isTauri, setIsTauri] = useState<boolean>(false);
   const [loadingSyncEdoPro, setLoadingSyncEdoPro] = useState(false);
+  const [loadingFinalize, setLoadingFinalize] = useState(false);
 
   /* ================= LOAD ================= */
 
@@ -214,6 +216,32 @@ export default function Dashboard() {
     return
   }
 
+  const handleFinalizeDuel = async () => {
+    const { value: duelId } = await Swal.fire({
+      title: "Finalizar Duelo",
+      input: "text",
+      inputLabel: "Digite o Duel ID:",
+      showCancelButton: true,
+      confirmButtonText: "Confirmar",
+      cancelButtonText: "Cancelar",
+      background: '#0f172a', // Para combinar com seu app
+      color: '#fff'
+    });
+
+    if (!duelId) return;
+
+    setLoadingFinalize(true);
+    try {
+      const res = await finalizeDuel(duelId);
+      Swal.fire("Sucesso!", "Duelo finalizado com sucesso!", res);
+    } catch (e: any) {
+      console.error(e);
+      Swal.fire("Erro", e.message || "Erro ao finalizar o duelo.", "error");
+    } finally {
+      setLoadingFinalize(false);
+    }
+  };
+
   /* ================= LOADING ================= */
 
   if (!user) {
@@ -326,6 +354,18 @@ export default function Dashboard() {
             >
               Ativar Booster
             </button>
+
+            <button
+              onClick={handleFinalizeDuel}
+              disabled={loadingFinalize}
+              style={{
+                ...buttonStyle,
+                ...(loadingFinalize ? buttonDisabled : {}),
+              }}
+            >
+              {loadingFinalize ? "Finalizando..." : "Finalizar Duelo"}
+            </button>
+
           </div>
         )}
 
