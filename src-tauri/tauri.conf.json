@@ -1,7 +1,7 @@
 {
   "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
   "productName": "rr_ygo_7_client",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "identifier": "com.rrygo7.client",
   "build": {
     "frontendDist": "../dist",
@@ -31,6 +31,7 @@
   },
   "bundle": {
     "active": true,
+    "createUpdaterArtifacts": true,
     "targets": "all",
     "icon": [
       "icons/32x32.png",
@@ -42,17 +43,13 @@
     "android": {
       "debugApplicationIdSuffix": ".debug"
     }
+  },
+  "plugins": {
+    "updater": {
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IEQyNEUyN0NDN0M5QkEwQjQKUldTMG9KdDh6Q2RPMHNxeWFJODBrQXc3MjQ0c0pqSHVEL2xiSWVYeEtWL2tmRTdQbjJGbEZ0TEIK",
+      "endpoints": [
+        "https://raw.githubusercontent.com/SEU_USUARIO/SEU_REPOSITORIO/refs/heads/main/updater-manifest.json"
+      ]
+    }
   }
 }
-
-
-
-
-
-
-
-
-
-
-
-

@@ -2,12 +2,27 @@ import { useEffect, useState } from "react";
 import { getMe, login } from "../services/auth";
 import { useNavigate } from "react-router-dom";
 import { getAuthToken, getLastEmail, removeAuthToken, setAuthToken, setLasEmail } from "../utils/store";
+import { check } from '@tauri-apps/plugin-updater';
+import { relaunch } from '@tauri-apps/plugin-process';
 
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(true);
+  const [isUpdating, setIsUpdating] = useState(false);
   const navigate = useNavigate();
+
+
+  async function checkUpdate() {
+    const update = await check();
+
+    if (update) {
+      setIsUpdating(true);
+
+      await update.downloadAndInstall();
+      await relaunch();
+    }
+  }
 
   async function handleLogin() {
     try {
@@ -25,6 +40,8 @@ export default function Login() {
   useEffect(() => {
     async function load (){
       try{
+        await checkUpdate()
+        
         const last_email = getLastEmail();
         if(last_email) setEmail(last_email);
 
@@ -50,6 +67,14 @@ export default function Login() {
 
     load();
   }, []);
+
+  if (isUpdating) {
+    return (
+      <div>
+        Atualizando aplicativo...
+      </div>
+    )
+  }
 
   if (isLoading) {
     return (

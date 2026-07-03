@@ -7,6 +7,7 @@
   ],
   "permissions": [
     "core:default",
+    "updater:default",
     "dialog:allow-open",
     "dialog:allow-message",
     "dialog:allow-confirm",
@@ -79,6 +80,7 @@
     "fs:read-all",
     "store:default",
     "store:allow-load",
-    "store:allow-save"
+    "store:allow-save",
+    "http:default"
   ]
 }

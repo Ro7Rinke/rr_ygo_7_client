@@ -1,0 +1,15 @@
+{
+  "version": "0.1.1",
+  "notes": "Adicionado https",
+  "pub_date": "2026-07-03T07:32:52.553Z",
+  "platforms": {
+    "windows-x86_64": {
+      "signature": "CONTEUDO_DO_ARQUIVO_EXE_DOT_SIG",
+      "url": "https://github.com/SEU_USUARIO/SEU_REPOSITORIO/releases/download/v2.0.0/myapp-setup.exe"
+    },
+    "darwin-aarch64": {
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVTMG9KdDh6Q2RPMHVvSTB0OFlsSmpvMW5rdUlHS3JtdUl2NU9zYVFiRytGSDBGRURZQWhya1JDbXBzWVdPajBnRHJpUE4xVFlIZjd0Uk1SMGxILzNBNXkyaGw5UXZoeWd3PQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzgzMDYzOTcyCWZpbGU6cnJfeWdvXzdfY2xpZW50LmFwcC50YXIuZ3oKb2wxQTVYYzlpeHRQYlVmVXM0bmN4b05idmowcGtJVS9SNHg4VjBzMkhZRkU3QlBsMFhIQWU5VnFWa2c4UDVRWVRwWlYvU2Erd2U1dVRla2RseTZyQlE9PQo=",
+      "url": "https://github.com/Ro7Rinke/rr_ygo_7_server/releases/download/v0.1.1/rr_ygo_7_client.app.tar.gz"
+    }
+  }
+}
