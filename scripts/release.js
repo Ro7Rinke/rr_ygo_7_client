@@ -13,7 +13,7 @@ const __dirname = path.dirname(__filename);
 const ROOT_DIR = path.resolve(__dirname, '..');
 
 // 🔧 CONFIGURAÇÕES
-const GITHUB_BASE_URL = "https://github.com/Ro7Rinke/rr_ygo_7_server/releases/download";
+const GITHUB_BASE_URL = "https://github.com/Ro7Rinke/rr_ygo_7_client/releases/download";
 const FILES = {
   packageJson: path.join(ROOT_DIR, 'package.json'),
   tauriConf: path.join(ROOT_DIR, 'src-tauri', 'tauri.conf.json'),
