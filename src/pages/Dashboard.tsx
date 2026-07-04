@@ -44,6 +44,16 @@ export default function Dashboard() {
 
   /* ================= LOAD ================= */
 
+  const loadUser = async () => {
+    const data = await getMe();
+
+    if (!data) {
+      throw new Error("User inválido");
+    }
+
+    setUser(data);
+  }
+
   useEffect(() => {
     async function load() {
       const token = getAuthToken();
@@ -57,13 +67,7 @@ export default function Dashboard() {
         const tauriCheck = await checkIsTauri();
         setIsTauri(tauriCheck);
 
-        const data = await getMe();
-
-        if (!data) {
-          throw new Error("User inválido");
-        }
-
-        setUser(data);
+        await loadUser()
 
         if (tauriCheck) {
           const saved = await getPath();
@@ -170,7 +174,10 @@ export default function Dashboard() {
 
     try {
       await syncEdoPro();
-      if (!isSilent) alert("Sincronizado com sucesso.\nReinicie o EDOPro!");
+      if (!isSilent) {
+        await loadUser()
+        alert("Sincronizado com sucesso.\nReinicie o EDOPro!");
+      }
     } catch (e: any) {
       console.error(e);
       if (!isSilent) alert(e.message || "Erro ao sincronizar EDOPro");
