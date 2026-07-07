@@ -4,6 +4,7 @@ import { syncCards } from "../services/cards";
 import type { User } from "../types/User";
 import { useNavigate } from "react-router-dom";
 import Swal from 'sweetalert2';
+import { version } from '../../package.json'
 
 // TAURI
 import { open } from "@tauri-apps/plugin-dialog";
@@ -416,6 +417,8 @@ export default function Dashboard() {
           </button>
         </div>
 
+        <p style={text} >Version: {version}</p>
+
       </div>
     </div>
   );
@@ -488,4 +491,10 @@ const buttonStyle: React.CSSProperties = {
 const buttonDisabled: React.CSSProperties = {
   opacity: 0.6,
   cursor: "not-allowed",
+};
+
+const text: React.CSSProperties = {
+  color: "#cbd5f5",
+  fontSize: "14px",
+  textAlign: "center",
 };
