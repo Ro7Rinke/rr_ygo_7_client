@@ -1,15 +1,15 @@
 {
-  "version": "0.1.1",
-  "notes": "Adicionado https",
-  "pub_date": "2026-07-03T07:32:52.553Z",
+  "version": "0.1.2",
+  "notes": "Atualizar dashboard ao sincronizar e exibir versão",
+  "pub_date": "2026-07-07T01:27:48.607Z",
   "platforms": {
     "windows-x86_64": {
       "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVTMG9KdDh6Q2RPMHBCYW1lNHFxTmZSM0c0K3hIMmRoWHRJam9icVFtNnplazBZc2pDcERoRXpTdWRZY2NVbTlyVVRycHExS2xBcFExLzFpNldEUlc0NE11c2oxemlOV1E4PQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzgzMDY0NTU5CWZpbGU6cnJfeWdvXzdfY2xpZW50XzAuMS4xX3g2NC1zZXR1cC5leGUKYXZKU1pub21tdEo4ZENiSVJFdStYczErN2xHckc4c25pL3lFeFVSZFdUSVdENHIwdnoxSzhsU2p0UHhnUmlyV0hHd3ZVRTRhY2tCSWRJTkM4YVl2QXc9PQo=",
       "url": "https://github.com/Ro7Rinke/rr_ygo_7_client/releases/download/v0.1.1/rr_ygo_7_client_0.1.1_x64-setup.exe"
     },
     "darwin-aarch64": {
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVTMG9KdDh6Q2RPMG85YStnZzJMWHkrWlBUNTdKWDdGeEc3UEMrMkZNL1lIVi9KQUxTTTZFNjQ3RmtKZSs3SGFKTitBTlZzU2UxK2JBVUZMQ0VrRzNVSmU5c0ZIQWIxWXdFPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzgzMzg3NDQ5CWZpbGU6cnJfeWdvXzdfY2xpZW50LmFwcC50YXIuZ3oKRkN6OHZPRjVneWpyQzAwWmZ6cXBsSDZXU3NQSTNDTEI3WDJpbUp3elBqK0RqWnBVZVdROTZmZ04rYTZnVTNoOE1VVWlQY2FkRFZYQ0VCV0g5SnF3Q2c9PQo=",
-      "url": "https://github.com/Ro7Rinke/rr_ygo_7_client/releases/download/v0.1.1/rr_ygo_7_client.app.tar.gz"
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVTMG9KdDh6Q2RPMHBQUHdGYTlZZFd3MUNoVGltckR3L2tuOVVBTDZ4enNmTEkrelg3aU1XaTlIcUo1ZW5Fd0QwcDU0SHNabnJSeWhXRHp2MGZic0Y2N1VOSHNoOFprTWdRPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzgzMzg3NjY4CWZpbGU6cnJfeWdvXzdfY2xpZW50LmFwcC50YXIuZ3oKT0pCM2EvcW5URG9ibFp3VEVVVWlvNCsvK3NNd0FrRWNNWE0vb2QwcDE1cFNWdHJ5blhyMFRNN1hNV0ZqcVNyN1RxdjhReWRSNS9wT2JrMjA0M0NiRHc9PQo=",
+      "url": "https://github.com/Ro7Rinke/rr_ygo_7_client/releases/download/v0.1.2/rr_ygo_7_client.app.tar.gz"
     }
   }
 }
