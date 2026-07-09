@@ -17,7 +17,8 @@ const GITHUB_BASE_URL = "https://github.com/Ro7Rinke/rr_ygo_7_client/releases/do
 const FILES = {
   packageJson: path.join(ROOT_DIR, 'package.json'),
   tauriConf: path.join(ROOT_DIR, 'src-tauri', 'tauri.conf.json'),
-  updater: path.join(ROOT_DIR, 'refs', 'heads', 'main', 'updater.json')
+  updater: path.join(ROOT_DIR, 'refs', 'heads', 'main', 'updater.json'),
+  cargoToml: path.join(ROOT_DIR, 'src-tauri', 'Cargo.toml')
 };
 
 // 1. Processar Argumentos da Linha de Comando
@@ -67,6 +68,15 @@ if (degree) {
   fs.writeFileSync(FILES.tauriConf, JSON.stringify(tauriData, null, 2));
 } else {
   console.log(`🔄 Mantendo a versão atual (${currentVersion}) e rodando build...`);
+}
+
+// Atualizar Cargo.toml (Necessário para o Windows/NSIS gerar o nome correto)
+if (fs.existsSync(FILES.cargoToml)) {
+  let cargoContent = fs.readFileSync(FILES.cargoToml, 'utf8');
+  // Substitui a primeira ocorrência de version = "x.x.x" no Cargo.toml
+  cargoContent = cargoContent.replace(/^version = ".*?"/m, `version = "${newVersion}"`);
+  fs.writeFileSync(FILES.cargoToml, cargoContent);
+  console.log(`📝 Cargo.toml sincronizado com sucesso para v${newVersion}`);
 }
 
 // 3. Rodar o Build do Tauri injetando o .env
