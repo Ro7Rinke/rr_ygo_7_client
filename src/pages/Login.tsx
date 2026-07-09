@@ -14,13 +14,30 @@ export default function Login() {
 
 
   async function checkUpdate() {
-    const update = await check();
+    try {
+      const update = await check();
 
-    if (update) {
-      setIsUpdating(true);
+      if (update) {
+        setIsUpdating(true);
 
-      await update.downloadAndInstall();
-      await relaunch();
+        await update.downloadAndInstall((event) => {
+          switch (event.event) {
+            case 'Started':
+              console.log(`Download iniciado. Tamanho: ${event.data.contentLength}`);
+              break;
+            case 'Progress':
+              console.log(`Baixados ${event.data.chunkLength} bytes`);
+              break;
+            case 'Finished':
+              console.log('Download concluído!');
+              break;
+          }
+        });
+
+        await relaunch();
+      }
+    } catch (error) {
+      console.error("Erro na verificação de update:", error);
     }
   }
 
@@ -38,29 +55,29 @@ export default function Login() {
   }
 
   useEffect(() => {
-    async function load (){
-      try{
+    async function load() {
+      try {
         await checkUpdate()
-        
+
         const last_email = getLastEmail();
-        if(last_email) setEmail(last_email);
+        if (last_email) setEmail(last_email);
 
         const token = getAuthToken();
-        if(token){
-          try{
+        if (token) {
+          try {
             const user = await getMe();
-            if(user){
+            if (user) {
               navigate("/dashboard")
-            }else{
+            } else {
               removeAuthToken()
             }
-          }catch (e){
+          } catch (e) {
             removeAuthToken()
           }
         }
-      }catch (e){
+      } catch (e) {
 
-      }finally{
+      } finally {
         setIsLoading(false);
       }
     };
