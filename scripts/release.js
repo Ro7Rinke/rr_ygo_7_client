@@ -121,14 +121,16 @@ if (!targetConfig || !targetConfig.archMap[osArch]) {
 
 const updaterPlatformKey = targetConfig.archMap[osArch];
 
-// Encontrar o arquivo .sig na pasta de build
-console.log(`🔍 Procurando arquivo de assinatura em: ${targetConfig.bundleDir}`);
+console.log(`🔍 Procurando arquivo de assinatura para a versão ${newVersion} em: ${targetConfig.bundleDir}`);
 const filesInDir = fs.readdirSync(targetConfig.bundleDir);
-const sigFile = filesInDir.find(f => f.endsWith(`${targetConfig.ext}.sig`));
-const targetFile = filesInDir.find(f => f.endsWith(targetConfig.ext) && !f.endsWith('.sig'));
+
+// Filtra garantindo que o arquivo contém a versão atual E termina com a extensão esperada
+const sigFile = filesInDir.find(f => f.includes(newVersion) && f.endsWith(`${targetConfig.ext}.sig`));
+const targetFile = filesInDir.find(f => f.includes(newVersion) && f.endsWith(targetConfig.ext) && !f.endsWith('.sig'));
 
 if (!sigFile || !targetFile) {
-  console.error('❌ Arquivo .sig ou pacote de instalação não encontrado!');
+  console.error(`❌ Arquivo .sig ou pacote de instalação para a versão ${newVersion} não encontrado!`);
+  console.error(`Arquivos encontrados na pasta:`, filesInDir);
   process.exit(1);
 }
 
