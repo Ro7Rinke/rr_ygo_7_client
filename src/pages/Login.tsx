@@ -38,6 +38,7 @@ export default function Login() {
       }
     } catch (error) {
       console.error("Erro na verificação de update:", error);
+      alert(JSON.stringify(error))
     }
   }
 
