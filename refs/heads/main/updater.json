@@ -1,15 +1,15 @@
 {
   "version": "0.3.0",
-  "notes": "Auto update funcionando",
-  "pub_date": "2026-07-12T15:47:13.506Z",
+  "notes": "Server customizado e tunel",
+  "pub_date": "2026-07-12T15:51:51.802Z",
   "platforms": {
     "windows-x86_64": {
       "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVTMG9KdDh6Q2RPMHBrK1ErbEdOZDNGRnBnZHZXUWNpSEVjMjRtT0NGL0M4ZzVhaElQTWxXTWJyR2xtNUgxT2czRU56ZDBpcVNYNGtrcmJKK2V5R3ZheEJJeHRqK1hUTGdVPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzgzODcxMjMyCWZpbGU6cnJfeWdvXzdfY2xpZW50XzAuMy4wX3g2NC1zZXR1cC5leGUKd1Jwb3JNek44c3ZOZ3BPcFptRkFhWnU3b3dYVTBCSGVnUXRwMGk0MTdVUDZMdjVsUW1VN0tJOEg0Q0l1WldHT3NmZlEremQ2NlloM28rWjhyRUVYQ2c9PQo=",
       "url": "https://github.com/Ro7Rinke/rr_ygo_7_client/releases/download/v0.3.0/rr_ygo_7_client_0.3.0_x64-setup.exe"
     },
     "darwin-aarch64": {
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVTMG9KdDh6Q2RPMHNpWUw3emlCK29ycjlUeXhUcTBhUlF4aFBieENNYWY2ZlFRTHdHbUxCZ3o4SHB0THh0ZWRBY2ZFSmhYa1djd2dnV2Rod1BULzFHcEZuVWRXS0ZpRWdJPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzgzODM1MTQ1CWZpbGU6cnJfeWdvXzdfY2xpZW50LmFwcC50YXIuZ3oKbkdBZGlPb1ovL2J1NXhUVWZvM0FVY2J0Z3RBTVd2cmdlck5jek1BT1d6TTY0MEt1emNoSkFmNlkwYkZnK1dON2lwSm5YZkYwQXYxK25raHQya05HRHc9PQo=",
-      "url": "https://github.com/Ro7Rinke/rr_ygo_7_client/releases/download/v0.2.1/rr_ygo_7_client.app.tar.gz"
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVTMG9KdDh6Q2RPMHZnb0dWQ1NtR1gvMzVDM2t3VXZiWTZ5eTBRSm5Qa0VzS0JnVUt4RmRNekdtVytTajdsUkJoSm5jRXhKejhDWjJWUHB3b0FuWnpVQ3Bmdkk0cmtScndvPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzgzODcxNTExCWZpbGU6cnJfeWdvXzdfY2xpZW50LmFwcC50YXIuZ3oKOVlxaTBaZ1ZVM2tUS3VVenFlalYyME9SMVJtYzRiNWVmQmF5eklRUzdDdkE4RlNaeEFmVnhHNE9CSXQ5VGUxRHhjMUJsd1ZRdXBKSmFtV0JYWEJvQ0E9PQo=",
+      "url": "https://github.com/Ro7Rinke/rr_ygo_7_client/releases/download/v0.3.0/rr_ygo_7_client.app.tar.gz"
     }
   }
 }
