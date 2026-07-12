@@ -1,4 +1,9 @@
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
+
+pub mod cloudflare;
+
+pub use cloudflare::{ensure_binary, start_tunnel, stop_tunnel, tunnel_status};
+
 pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_http::init())
@@ -17,7 +22,9 @@ pub fn run() {
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_fs::init())
         .plugin(tauri_plugin_os::init())
+        .plugin(tauri_plugin_shell::init())
         .plugin(tauri_plugin_store::Builder::default().build())
+        .invoke_handler(tauri::generate_handler![ensure_binary, start_tunnel, stop_tunnel, tunnel_status])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

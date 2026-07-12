@@ -15,6 +15,7 @@ import { savePath, getPath, getAuthToken, removeAuthToken } from "../utils/store
 import { syncEdoPro } from "../utils/sync";
 import { finalizeDuel, uploadReplay } from "../services/game";
 import { handleImportBoosterJson } from "../utils/booster";
+import { ensureBinary, startTunnel } from "../utils/cloudflare";
 
 /* ================= CONFIG ================= */
 
@@ -72,6 +73,8 @@ export default function Dashboard() {
 
         if (tauriCheck) {
           const saved = await getPath();
+
+          console.log(await startTunnel())
 
           if (saved) {
             const existsBase = await exists(saved);

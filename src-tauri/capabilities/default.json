@@ -84,6 +84,20 @@
     "store:default",
     "store:allow-load",
     "store:allow-save",
-    "http:default"
+    "http:default",
+    {
+      "identifier": "http:allow-fetch",
+      "allow": [
+        {
+          "url": "https://*/*"
+        },
+        {
+          "url": "http://*/*"
+        }
+      ]
+    },
+    "os:default",
+    "os:allow-os-type",
+    "os:allow-arch"
   ]
 }
