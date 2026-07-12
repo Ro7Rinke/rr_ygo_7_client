@@ -1,11 +1,11 @@
 {
-  "version": "0.2.0",
-  "notes": "Correção do updater",
-  "pub_date": "2026-07-09T09:01:00.642Z",
+  "version": "0.2.1",
+  "notes": "Auto update funcionando",
+  "pub_date": "2026-07-12T05:18:52.655Z",
   "platforms": {
     "windows-x86_64": {
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVTMG9KdDh6Q2RPMGhLUGRWSzBIc1JWSVRpZFRvTm1uMXFYT1NKWTcxM0NzY2wxQ2hINlEzbVJOUTZ5dmdjWWdBNmRpeW5aM3lrMmpoY29PcHpsdkJCTUFxRElEN1ZscndnPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzgzNTkwNzIxCWZpbGU6cnJfeWdvXzdfY2xpZW50XzAuMi4wX3g2NC1zZXR1cC5leGUKQ0JMUXFSL2ZudlFjc3N1RnNYN0tzMjIrVFFGbHJWNVJNMEdnZkJKTVBFeXI5dlRQajJhRi9leE5WYjgzSkdtRzh1blJwd2svQzJwQ1pYd09GMmo3QVE9PQo=",
-      "url": "https://github.com/Ro7Rinke/rr_ygo_7_client/releases/download/v0.2.0/rr_ygo_7_client_0.2.0_x64-setup.exe"
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVTMG9KdDh6Q2RPMGpzVHNnK2xwdld1TEdmS2QwcS9lMDlmdW9WOHJQbXhyK29YbS9oWUF0TDhEWVAwVjV4anh4QjN2cXd5dWxWNkh3cGkvL1RZZjdYTU15N2htSmFIeFFZPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzgzODMzNTMxCWZpbGU6cnJfeWdvXzdfY2xpZW50XzAuMi4xX3g2NC1zZXR1cC5leGUKM3Joc0lOL1VEcmNhZ0xZck1ybm9wVWozL1VCdGw5c3FjWDBtMXZZb0dhWWdleW0rdFBRQ3JTQ1ovNktJR2dHU2w3d0VGUDJ2ejZpNFp1aHBaZmlTQmc9PQo=",
+      "url": "https://github.com/Ro7Rinke/rr_ygo_7_client/releases/download/v0.2.1/rr_ygo_7_client_0.2.1_x64-setup.exe"
     },
     "darwin-aarch64": {
       "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVTMG9KdDh6Q2RPMGlyS1huenNEcW85VzVjczUzb00zQjh1dzRtakF0dHZqWWQwYmtGaFhESW1TTkVrbDRMY0c4aUNiT25HSDZmZFc1d21HZnhqQTFmWFZMNG0vejVWdXdRPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzgzNTg5OTk3CWZpbGU6cnJfeWdvXzdfY2xpZW50LmFwcC50YXIuZ3oKWUpIajJ4bWlPOHV6bm1uTmNDTlR2THFiU0RWTWZqOUxqSkFLZXhQQWlFTm5Qb3pIbFU5eTFUNzF0TnpNaEM5MmZKaTlocTFrQm5QS0lKZjltTVJlQ1E9PQo=",
