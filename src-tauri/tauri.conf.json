@@ -1,7 +1,7 @@
 {
   "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
   "productName": "rr_ygo_7_client",
-  "version": "0.2.1",
+  "version": "0.3.0",
   "identifier": "com.rrygo7.client",
   "build": {
     "frontendDist": "../dist",
