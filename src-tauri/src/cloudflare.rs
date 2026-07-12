@@ -9,6 +9,11 @@ use walkdir::WalkDir;
 use std::io::{BufRead, BufReader};
 use std::thread;
 
+#[cfg(windows)]
+use windows_sys::Win32::System::Threading::{OpenProcess, TerminateProcess, PROCESS_TERMINATE};
+#[cfg(windows)]
+use windows_sys::Win32::Foundation::CloseHandle;
+
 const GAME_URL: &str = "rrygo7-pro-game.ro7rinke.com.br";
 const LOCAL_PORT: &str = "7911";
 const APP_DIR_NAME: &str = "RRYGO7";
@@ -253,17 +258,18 @@ fn stop_tunnel_impl() -> Result<String> {
     }
     #[cfg(windows)]
     {
-      use windows_sys::Win32::System::Threading::{OpenProcess, TerminateProcess, PROCESS_TERMINATE};
-      use windows_sys::Win32::Foundation::CloseHandle;
-      unsafe {
-        let handle = OpenProcess(PROCESS_TERMINATE, 0, pid_i32 as u32);
-        if handle != 0 {
-          TerminateProcess(handle, 1);
-          CloseHandle(handle);
-          let _ = fs::remove_file(&pid_path);
-          return Ok("stopped".into());
+        use std::convert::TryInto;
+        unsafe {
+            // converte i32 -> u32 de forma direta (PID não será negativo aqui)
+            let pid_u32: u32 = pid_i32.try_into().unwrap_or_default();
+            let handle = OpenProcess(PROCESS_TERMINATE, 0, pid_u32);
+            if handle != 0 {
+                TerminateProcess(handle, 1);
+                CloseHandle(handle);
+                let _ = fs::remove_file(&pid_path);
+                return Ok("stopped".into());
+            }
         }
-      }
     }
 
     // fallback: kill by name (best-effort)
