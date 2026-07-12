@@ -9,7 +9,6 @@ import 'dotenv/config';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Como o script está em "scripts/", a raiz do projeto é uma pasta acima (..)
 const ROOT_DIR = path.resolve(__dirname, '..');
 
 // 🔧 CONFIGURAÇÕES
@@ -24,15 +23,14 @@ const FILES = {
 // 1. Processar Argumentos da Linha de Comando
 const args = process.argv.slice(2);
 let degree = null;
-let notes = "Nova atualização disponível.";
+let customNotes = null; // 👈 MUDANÇA: Começa nulo para saber se o usuário passou ou não
 
 for (let i = 0; i < args.length; i++) {
   if (args[i] === '--degree') degree = args[i + 1];
-  if (args[i] === '--notes') notes = args[i + 1];
+  if (args[i] === '--notes') customNotes = args[i + 1];
 }
 
 // 2. Lógica de Atualização de Versão (SemVer)
-// Em ESM não podemos usar require() direto em JSON, então lemos com fs:
 const pkgDataRaw = fs.readFileSync(FILES.packageJson, 'utf8');
 let pkgData = JSON.parse(pkgDataRaw);
 let currentVersion = pkgData.version;
@@ -70,33 +68,15 @@ if (degree) {
   console.log(`🔄 Mantendo a versão atual (${currentVersion}) e rodando build...`);
 }
 
-// Atualizar Cargo.toml (Necessário para o Windows/NSIS gerar o nome correto)
+// Atualizar Cargo.toml
 if (fs.existsSync(FILES.cargoToml)) {
   let cargoContent = fs.readFileSync(FILES.cargoToml, 'utf8');
-  // Substitui a primeira ocorrência de version = "x.x.x" no Cargo.toml
   cargoContent = cargoContent.replace(/^version = ".*?"/m, `version = "${newVersion}"`);
   fs.writeFileSync(FILES.cargoToml, cargoContent);
   console.log(`📝 Cargo.toml sincronizado com sucesso para v${newVersion}`);
 }
 
-// 3. Rodar o Build do Tauri injetando o .env
-try {
-  console.log('⏳ Iniciando build do Tauri...');
-  
-  // Clona as variáveis de ambiente e força a senha vazia 
-  // para o Tauri não abrir o prompt interativo
-  const buildEnv = { 
-    ...process.env, 
-    TAURI_SIGNING_PRIVATE_KEY_PASSWORD: process.env.TAURI_SIGNING_PRIVATE_KEY_PASSWORD || "" 
-  };
-
-  execSync('npx @tauri-apps/cli build', { stdio: 'inherit', env: buildEnv, cwd: ROOT_DIR });
-} catch (error) {
-  console.error('❌ Falha no build do Tauri.');
-  process.exit(1);
-}
-
-// 4. Mapear Plataforma/Arquitetura e Coletar a Assinatura
+// 3. Mapear Plataforma/Arquitetura
 const platformMap = {
   darwin: {
     archMap: { x64: 'darwin-x86_64', arm64: 'darwin-aarch64' },
@@ -119,43 +99,97 @@ if (!targetConfig || !targetConfig.archMap[osArch]) {
   process.exit(0);
 }
 
+// 🧹 Limpa a pasta do bundle antes do build
+if (fs.existsSync(targetConfig.bundleDir)) {
+  console.log(`🧹 Limpando pasta de bundle anterior: ${targetConfig.bundleDir}`);
+  fs.rmSync(targetConfig.bundleDir, { recursive: true, force: true });
+}
+
+// 4. Rodar o Build do Tauri
+try {
+  console.log('⏳ Iniciando build do Tauri...');
+  
+  const buildEnv = { 
+    ...process.env, 
+    TAURI_SIGNING_PRIVATE_KEY_PASSWORD: process.env.TAURI_SIGNING_PRIVATE_KEY_PASSWORD || "" 
+  };
+
+  execSync('npx @tauri-apps/cli build', { stdio: 'inherit', env: buildEnv, cwd: ROOT_DIR });
+} catch (error) {
+  console.error('❌ Falha no build do Tauri.');
+  process.exit(1);
+}
+
+// 5. Coletar o arquivo .sig e o Pacote
 const updaterPlatformKey = targetConfig.archMap[osArch];
 
-console.log(`🔍 Procurando arquivo de assinatura para a versão ${newVersion} em: ${targetConfig.bundleDir}`);
+console.log(`🔍 Procurando arquivo de assinatura em: ${targetConfig.bundleDir}`);
 const filesInDir = fs.readdirSync(targetConfig.bundleDir);
 
-// Filtra garantindo que o arquivo contém a versão atual E termina com a extensão esperada
-const sigFile = filesInDir.find(f => f.includes(newVersion) && f.endsWith(`${targetConfig.ext}.sig`));
-const targetFile = filesInDir.find(f => f.includes(newVersion) && f.endsWith(targetConfig.ext) && !f.endsWith('.sig'));
+let sigFile, targetFile;
+
+if (osPlatform === 'win32') {
+  sigFile = filesInDir.find(f => f.includes(newVersion) && f.endsWith(`${targetConfig.ext}.sig`));
+  targetFile = filesInDir.find(f => f.includes(newVersion) && f.endsWith(targetConfig.ext) && !f.endsWith('.sig'));
+} else {
+  sigFile = filesInDir.find(f => f.endsWith(`${targetConfig.ext}.sig`));
+  targetFile = filesInDir.find(f => f.endsWith(targetConfig.ext) && !f.endsWith('.sig'));
+}
 
 if (!sigFile || !targetFile) {
-  console.error(`❌ Arquivo .sig ou pacote de instalação para a versão ${newVersion} não encontrado!`);
+  console.error(`❌ Arquivo .sig ou pacote de instalação não encontrado para ${osPlatform}!`);
   console.error(`Arquivos encontrados na pasta:`, filesInDir);
   process.exit(1);
 }
 
 const signatureContent = fs.readFileSync(path.join(targetConfig.bundleDir, sigFile), 'utf8').trim();
 
-// 5. Atualizar o updater.json
-let updaterData = { version: newVersion, notes: notes, pub_date: new Date().toISOString(), platforms: {} };
+// 6. Atualizar o updater.json de forma segura
+let updaterData = {
+  version: newVersion,
+  notes: customNotes || "Nova atualização disponível.",
+  pub_date: new Date().toISOString(),
+  platforms: {}
+};
 
 if (fs.existsSync(FILES.updater)) {
-  updaterData = JSON.parse(fs.readFileSync(FILES.updater, 'utf8'));
-  // Atualiza metadados gerais se a versão mudou
-  if (degree) {
-    updaterData.version = newVersion;
-    updaterData.notes = notes;
-    updaterData.pub_date = new Date().toISOString();
+  try {
+    updaterData = JSON.parse(fs.readFileSync(FILES.updater, 'utf8'));
+  } catch (err) {
+    console.warn('⚠️ Erro ao ler updater.json existente, criando novo.');
   }
 }
 
-// Inserir os dados da plataforma que acabou de ser buildada
+// Atualizar versão e data
+updaterData.version = newVersion;
+updaterData.pub_date = new Date().toISOString();
+
+// 💡 SÓ atualiza o 'notes' se o usuário realmente passou a flag --notes
+if (customNotes) {
+  updaterData.notes = customNotes;
+} else if (!updaterData.notes) {
+  updaterData.notes = "Nova atualização disponível.";
+}
+
+if (!updaterData.platforms) {
+  updaterData.platforms = {};
+}
+
+// Inserir os dados da plataforma que acabou de ser compilada
 updaterData.platforms[updaterPlatformKey] = {
   signature: signatureContent,
   url: `${GITHUB_BASE_URL}/v${newVersion}/${targetFile}`
 };
 
+// Garantir que a pasta do updater.json existe antes de salvar
+const updaterDir = path.dirname(FILES.updater);
+if (!fs.existsSync(updaterDir)) {
+  fs.mkdirSync(updaterDir, { recursive: true });
+}
+
 fs.writeFileSync(FILES.updater, JSON.stringify(updaterData, null, 2));
 
 console.log(`✅ updater.json atualizado com sucesso para ${updaterPlatformKey}!`);
+console.log(`📝 Notes mantido/atualizado como: "${updaterData.notes}"`);
 console.log(`📁 Arquivo gerado: ${targetFile}`);
+console.log(`🔗 URL: ${GITHUB_BASE_URL}/v${newVersion}/${targetFile}`);
