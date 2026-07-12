@@ -5,10 +5,26 @@ import { join } from "@tauri-apps/api/path";
 import { syncReplays } from "./replay";
 import { getMe } from "../services/auth";
 
+interface ServerConfig {
+  name: string;
+  address: string;
+  duelport: number;
+  roomaddress: string;
+  roomlistprotocol: string;
+  roomlistport: number;
+}
+
+const RR_SERVER: ServerConfig = {
+  name: "RR_YGO_7",
+  address: "127.0.0.1",
+  duelport: 7911,
+  roomaddress: "rrygo7-pro-room.ro7rinke.com.br",
+  roomlistprotocol: "https",
+  roomlistport: 443
+};
+
 /**
  * Atualiza o nickname do usuário dentro do arquivo config/system.conf do EDOPro.
- * @param basePath Caminho base onde a pasta 'config' está localizada.
- * @param newNickname O novo nick que será injetado no arquivo.
  */
 export async function updateEdoproNickname(basePath: string, newNickname: string): Promise<boolean> {
   try {
@@ -20,7 +36,6 @@ export async function updateEdoproNickname(basePath: string, newNickname: string
     }
 
     const content = await readTextFile(configPath);
-
     const nicknameRegex = /^(nickname\s*=\s*)(.*)$/m;
 
     let updatedContent = "";
@@ -32,10 +47,49 @@ export async function updateEdoproNickname(basePath: string, newNickname: string
     }
 
     await writeTextFile(configPath, updatedContent);
-
     return true;
   } catch (err) {
     console.log("Erro ao atualizar o nickname no EDOPro:", err);
+    return false;
+  }
+}
+
+/**
+ * Adiciona ou atualiza o servidor RR_YGO_7 dentro de config/configs.json
+ */
+export async function updateEdoproServers(basePath: string): Promise<boolean> {
+  try {
+    const configsJsonPath = await join(basePath, "config", "configs.json");
+
+    if (!(await exists(configsJsonPath))) {
+      console.log("Arquivo configs.json não foi encontrado em config/.");
+      return false;
+    }
+
+    const rawContent = await readTextFile(configsJsonPath);
+    const configsData = JSON.parse(rawContent);
+
+    if (!Array.isArray(configsData.servers)) {
+      configsData.servers = [];
+    }
+
+    // Procura se o servidor já existe pelo nome ou endereço da sala
+    const existingIndex = configsData.servers.findIndex(
+      (s: ServerConfig) => s.name === RR_SERVER.name || s.roomaddress === RR_SERVER.roomaddress
+    );
+
+    if (existingIndex !== -1) {
+      // Se já existe, atualiza os dados caso tenha tido alteração nas portas/URLs
+      configsData.servers[existingIndex] = RR_SERVER;
+    } else {
+      // Se não existe, adiciona no início da lista para prioridade do usuário
+      configsData.servers.unshift(RR_SERVER);
+    }
+
+    await writeTextFile(configsJsonPath, JSON.stringify(configsData, null, 4));
+    return true;
+  } catch (err) {
+    console.log("Erro ao atualizar os servidores no configs.json do EDOPro:", err);
     return false;
   }
 }
@@ -59,7 +113,9 @@ export async function syncEdoPro() {
     getUserCards(),
   ]);
 
-  await updateEdoproNickname(basePath, user.nickname)
+  // Sincroniza nickname e servidor nos arquivos de config do EDOPro
+  await updateEdoproNickname(basePath, user.nickname);
+  await updateEdoproServers(basePath);
 
   // =========================
   // 🟢 MY CARDS (whitelist)
