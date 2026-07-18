@@ -1,11 +1,11 @@
 {
-  "version": "0.3.0",
+  "version": "1.0.1",
   "notes": "Server customizado e tunel",
   "pub_date": "2026-07-12T15:51:51.802Z",
   "platforms": {
     "windows-x86_64": {
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVTMG9KdDh6Q2RPMHBrK1ErbEdOZDNGRnBnZHZXUWNpSEVjMjRtT0NGL0M4ZzVhaElQTWxXTWJyR2xtNUgxT2czRU56ZDBpcVNYNGtrcmJKK2V5R3ZheEJJeHRqK1hUTGdVPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzgzODcxMjMyCWZpbGU6cnJfeWdvXzdfY2xpZW50XzAuMy4wX3g2NC1zZXR1cC5leGUKd1Jwb3JNek44c3ZOZ3BPcFptRkFhWnU3b3dYVTBCSGVnUXRwMGk0MTdVUDZMdjVsUW1VN0tJOEg0Q0l1WldHT3NmZlEremQ2NlloM28rWjhyRUVYQ2c9PQo=",
-      "url": "https://github.com/Ro7Rinke/rr_ygo_7_client/releases/download/v0.3.0/rr_ygo_7_client_0.3.0_x64-setup.exe"
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVTMG9KdDh6Q2RPMHVmSktMYVRnT1BpcElDbFp4clcrVUw0S1lGVzVkNEN0WjRHeDJGODExdjgyOURDaGtNYS92ME9QaDVON3cwenI5eE9VTDVjbzZlMUhKWTJhSTJCUUFjPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzg0Mzk5ODA1CWZpbGU6cnJfeWdvXzdfY2xpZW50XzEuMC4xX3g2NC1zZXR1cC5leGUKeUM3Q0YwdURNMTdkeUF5OU45dDY3VGkzbGRZUWdRTkcyNmFMVi8zTTVRU2tRY1U5YVdEUHVVL25mNThWaFVzQVhlR25yckRlUWVaWEhGYUh5M01HQ2c9PQo=",
+      "url": "https://github.com/Ro7Rinke/rr_ygo_7_client/releases/download/v1.0.1/rr_ygo_7_client_1.0.1_x64-setup.exe"
     },
     "darwin-aarch64": {
       "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVTMG9KdDh6Q2RPMHZnb0dWQ1NtR1gvMzVDM2t3VXZiWTZ5eTBRSm5Qa0VzS0JnVUt4RmRNekdtVytTajdsUkJoSm5jRXhKejhDWjJWUHB3b0FuWnpVQ3Bmdkk0cmtScndvPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzgzODcxNTExCWZpbGU6cnJfeWdvXzdfY2xpZW50LmFwcC50YXIuZ3oKOVlxaTBaZ1ZVM2tUS3VVenFlalYyME9SMVJtYzRiNWVmQmF5eklRUzdDdkE4RlNaeEFmVnhHNE9CSXQ5VGUxRHhjMUJsd1ZRdXBKSmFtV0JYWEJvQ0E9PQo=",
