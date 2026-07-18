@@ -16,6 +16,7 @@ import { syncEdoPro } from "../utils/sync";
 import { finalizeDuel, uploadReplay } from "../services/game";
 import { handleImportBoosterJson } from "../utils/booster";
 import { ensureBinary, startTunnel } from "../utils/cloudflare";
+import { isEdoproRunning, makeAppBundlePath, restartEdopro, startEdopro, stopAllEdopro } from "../utils/edopro";
 
 /* ================= CONFIG ================= */
 
@@ -179,7 +180,11 @@ export default function Dashboard() {
     try {
       await syncEdoPro();
       if (!isSilent) {
+        if(await isEdoproRunning() && edoproPath && isValidPath) 
+          restartEdopro(makeAppBundlePath(edoproPath))
+        
         await loadUser()
+        
         alert("Sincronizado com sucesso.\nReinicie o EDOPro!");
       }
     } catch (e: any) {
@@ -390,7 +395,17 @@ export default function Dashboard() {
                 ...(loadingSync ? buttonDisabled : {}),
               }}
             >
-              {loadingSyncEdoPro ? "Sincronizando EdoPro..." : "Sincronizar EdoPro"}
+              {loadingSyncEdoPro ? "Sincronizando EDOPro..." : "Sincronizar EDOPro"}
+            </button>
+            <button
+              onClick={() => restartEdopro(makeAppBundlePath(edoproPath))}
+              disabled={loadingSyncEdoPro}
+              style={{
+                ...buttonStyle,
+                ...(loadingSync ? buttonDisabled : {}),
+              }}
+            >
+              {loadingSyncEdoPro ? "Sincronizando EDOPro..." : "Abrir EDOPro"}
             </button>
             <button
               onClick={handleSendReplay}

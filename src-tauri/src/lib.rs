@@ -4,6 +4,8 @@ pub mod cloudflare;
 
 pub use cloudflare::{ensure_binary, start_tunnel, stop_tunnel, tunnel_status};
 
+mod edopro;
+
 pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_http::init())
@@ -15,6 +17,7 @@ pub fn run() {
                         .build(),
                 )?;
             }
+            edopro::spawn_edopro_watcher(app.handle());
             Ok(())
         })
         .plugin(tauri_plugin_process::init())
@@ -24,7 +27,18 @@ pub fn run() {
         .plugin(tauri_plugin_os::init())
         .plugin(tauri_plugin_shell::init())
         .plugin(tauri_plugin_store::Builder::default().build())
-        .invoke_handler(tauri::generate_handler![ensure_binary, start_tunnel, stop_tunnel, tunnel_status])
+        .invoke_handler(tauri::generate_handler![
+            // cloudflare commands
+            ensure_binary,
+            start_tunnel,
+            stop_tunnel,
+            tunnel_status,
+            // edopro commands
+            edopro::edopro_is_running,
+            edopro::edopro_start,
+            edopro::edopro_stop_all,
+            edopro::edopro_restart
+        ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
