@@ -1,5 +1,6 @@
 import { invoke } from '@tauri-apps/api/core';
 import { listen } from '@tauri-apps/api/event';
+import { type } from '@tauri-apps/plugin-os';
 
 export async function isEdoproRunning(): Promise<boolean> {
   return await invoke('edopro_is_running') as boolean;
@@ -23,7 +24,11 @@ export function onEdoproStateChanged(cb: (running: boolean) => void) {
   });
 }
 
-export function makeAppBundlePath(folderPath: string, appBundleName = "EDOPro.app") {
+export function makeAppBundlePath(folderPath: string) {
   const normalized = folderPath.replace(/[\\/]+$/, "");
+  
+  const platform = type();
+  const appBundleName = platform === 'windows' ? "EDOPro.exe" : "EDOPro.app";
+  
   return `${normalized}/${appBundleName}`;
 }
